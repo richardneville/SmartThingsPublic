@@ -1,5 +1,5 @@
 definition (
-        name: "Leave home secure v1.1",
+        name: "Leave home secure",
         namespace: "richardneville",
         author: "Richard Neville",
         description: "Tells us if the doors and windows are open when we go out.",
