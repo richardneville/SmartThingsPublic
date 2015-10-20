@@ -47,12 +47,8 @@ def updated() {
 def initialize() {
     subscribe(presenceThings, "presence", presenceHandler)
     
-    if (contactSensorTrigger) {
-        subscribe(contactSensorTrigger, "contact", contactHandler)
-    }
-    if (switchThing) {
-        subscribe(switchThing, "switch", switchHandler)
-    }
+    subscribe(contactSensorTrigger, "contact", contactHandler)
+    subscribe(switchThing, "switch", switchHandler)
     
     /*
     subscribe(presenceSensorThing, "presence", presenceHandler)
