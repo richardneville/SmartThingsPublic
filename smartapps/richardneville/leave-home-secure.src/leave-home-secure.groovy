@@ -4,34 +4,32 @@ definition (
         author: "Richard Neville",
         description: "Tells us if the doors and windows are open when we go out.",
         category: "My Apps",
-        iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
-        iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
-        iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"
+        iconUrl: "http://animl.co.uk/img/SmartThingsLeaveHomeSecure.png",
+        iconX2Url: "http://animl.co.uk/img/SmartThingsLeaveHomeSecure@2x.png",
+        iconX3Url: "http://animl.co.uk/img/SmartThingsLeaveHomeSecure@2x.png"
         )
 
 preferences {
-    section("Set up things") {
+    section("Things to report on") {
         input "contactSensorThings", "capability.contactSensor", required: true, multiple: true, 
-            title: "Select which things to watch"
-        input "presenceThings", "capability.presenceSensor", required: true, multiple: true,
-            title: "Notify when these things leave home"
-        input "contactSensorTrigger", "capability.contactSensor", required: false,
-            title: "Trigger when this thing closes (optional)"
+            title: "Select which things to watch:"
+        paragraph "This SmartApp reports if the doors and windows are left open when we go out. The report can be triggered in various ways. v0.1"
+    }
+    section("Things to trigger the report") {
+        input "presenceThings", "capability.presenceSensor", required: false, multiple: true,
+            title: "Notify when these things leave home:"
+        input "contactSensorTrigger", "capability.contactSensor", required: false, multiple: true,
+            title: "Notify when this thing closes:"
+        input "motionSensorThing", "capability.motionSensor", required: false, multiple: true,
+            title: "Notify when movement is detected near this thing:"
     }
     section("Settings") {
-        input "fullReport", "bool", title: "Provide full report?", required: true
-        input "pushNotification", "bool", title: "Push the message out?", required: true
-        input("recipients", "contact", title: "Send messages to") {
-            input "phone", "phone", title: "Send an SMS?", description: "Phone Number", required: false
+        input "fullReport", "bool", title: "Full report, even if things are closed?", required: false
+        input "pushNotification", "bool", title: "Push the message out?", required: false
+        input("recipients", "contact", title: "Send messages to:") {
+            input "phone", "phone", title: "Send an SMS to:", description: "Phone Number", required: false
         }
-        paragraph "If no recipients are selected, app will send a push notification."
-    }
-    
-    section("Debug mode") {
-        input "debugMode", "bool", title: "Use debug mode?", required: true
-        //input "presenceThing", "capability.presenceSensor", required: true, title: "Which presenceSensor?"
-        //input "motionSensorThing", "capability.motionSensor", required: true, title: "Which motionSensor?"
-        input "switchThing", "capability.switch", required: false, title: "Which switch?"
+        paragraph "(If no recipients are selected, app will just send a push notification instead.)"
     }
 }
 
@@ -46,13 +44,11 @@ def updated() {
 
 def initialize() {
     subscribe(presenceThings, "presence", presenceHandler)
-    
     subscribe(contactSensorTrigger, "contact", contactHandler)
-    subscribe(switchThing, "switch", switchHandler)
+    subscribe(motionSensorThing, "motion", motionHandler)
     
     /*
-    subscribe(presenceSensorThing, "presence", presenceHandler)
-    subscribe(motionSensorThing, "motion", motionHandler)
+    subscribe(switchThing, "switch", switchHandler)
     */
 }
 
@@ -65,22 +61,33 @@ def presenceHandler(evt) {
 }
 
 def contactHandler(evt) {
-	//if (contactSensorTrigger) {
+	if (evt.value == "closed") {
         checkIfHouseSecure()
-    //}
+    }
 }
 
+def motionHandler(evt) {
+    if (evt.value == "active") {
+    	// motion detected
+        checkIfHouseSecure()
+    } else if (evt.value == "inactive") {
+        // motion stopped
+    }
+}
+
+/*
 def switchHandler(evt) {
 	if (debugMode) {
         checkIfHouseSecure()
     }
 }
+*/
 
 private checkIfHouseSecure() {
     for (contactSensorThing in contactSensorThings) {
         def sensorState = contactSensorThing.currentState("contact").value
         if (sensorState == "open" || fullReport) {
-            sendMsg("${contactSensorThing.displayName} is ${sensorState} r1")
+            sendMsg("${contactSensorThing.displayName} is ${sensorState}.")
         }
     }
 }
@@ -124,24 +131,11 @@ def switchHandler(evt) {
     }
 }
 
-def motionHandler(evt) {
-    if (evt.value == "active") {
-    	// motion detected
-        //sendPush("The ${motionSensorThing.displayName} detects activity!")
-        //def msg = "${presenceSensorThing.displayName} is ${presenceSensorThing.currentState("presence").value}"
-    } else if (evt.value == "inactive") {
-        // motion stopped
-        //sendPush("The ${motionSensorThing.displayName} detects nothing doing!")
-    }
-}
-
 def contactHandler(evt) {
     if (evt.value == "open") {
         // contactSensor open
-		sendPush("The ${contactSensorThing.displayName} is open!")
     } else if (evt.value == "closed") {
         // contactSensor closed
-		sendPush("The ${contactSensorThing.displayName} is closed!")
     }
 }
 
