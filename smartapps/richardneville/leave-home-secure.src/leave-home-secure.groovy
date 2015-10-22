@@ -16,7 +16,7 @@ preferences {
         input "presenceThings", "capability.presenceSensor", required: true, multiple: true,
             title: "Notify when these things leave home"
         input "contactSensorTrigger", "capability.contactSensor", required: false,
-            title: "Trigger when this thing opens (optional)"
+            title: "Trigger when this thing closes (optional)"
     }
     section("Settings") {
         input "fullReport", "bool", title: "Provide full report?", required: true
