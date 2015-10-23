@@ -17,7 +17,7 @@ preferences {
     }
     section("Things to trigger the report") {
         input "presenceThings", "capability.presenceSensor", required: false, multiple: true,
-            title: "Notify when these things leave home:"
+            title: "Notify when things leave home:"
         input "contactSensorTrigger", "capability.contactSensor", required: false, multiple: true,
             title: "Notify when this thing closes:"
         input "motionSensorThing", "capability.motionSensor", required: false, multiple: true,
@@ -84,11 +84,19 @@ def switchHandler(evt) {
 */
 
 private checkIfHouseSecure() {
+	sendNotificationEvent("The SmartApp, Leave Home Secure, has been triggered. Checking if anything's been left open...")
+    def foundSomethingOpen = false
     for (contactSensorThing in contactSensorThings) {
         def sensorState = contactSensorThing.currentState("contact").value
         if (sensorState == "open" || fullReport) {
+        	if (sensorState == "open") {
+            	foundSomethingOpen = true
+            }
             sendMsg("${contactSensorThing.displayName} is ${sensorState}.")
         }
+    }
+    if (foundSomethingOpen == false) {
+    	sendNotificationEvent("...And all's well.")
     }
 }
 
