@@ -13,7 +13,7 @@ preferences {
     section("Things to report on") {
         input "contactSensorThings", "capability.contactSensor", required: true, multiple: true, 
             title: "Select which things to watch:"
-        paragraph "This SmartApp reports if the doors and windows are left open when we go out. The report can be triggered in various ways. v0.1"
+        paragraph "This SmartApp reports if the doors and windows are left open when we go out. The report can be triggered in various ways. v0.2"
     }
     section("Things to trigger the report") {
         input "presenceThings", "capability.presenceSensor", required: false, multiple: true,
@@ -84,7 +84,6 @@ def switchHandler(evt) {
 */
 
 private checkIfHouseSecure() {
-	sendNotificationEvent("The SmartApp, Leave Home Secure, has been triggered. Checking if anything's been left open...")
     def foundSomethingOpen = false
     for (contactSensorThing in contactSensorThings) {
         def sensorState = contactSensorThing.currentState("contact").value
@@ -92,11 +91,12 @@ private checkIfHouseSecure() {
         	if (sensorState == "open") {
             	foundSomethingOpen = true
             }
-            sendMsg("${contactSensorThing.displayName} is ${sensorState}.")
+            sendMsg("Leave Home Secure: ${contactSensorThing.displayName} is ${sensorState}.")
         }
     }
-    if (foundSomethingOpen == false) {
-    	sendNotificationEvent("...And all's well.")
+
+	if (foundSomethingOpen == false) {
+    	sendNotificationEvent("Leave Home Secure: All's well.")
     }
 }
 
